@@ -31,7 +31,7 @@ serve(async (req) => {
     }
     const userId = claimsData.claims.sub;
 
-    const { message } = await req.json();
+    const { message, history } = await req.json();
 
     // Fetch user context
     const [memoriesRes, remindersRes] = await Promise.all([
@@ -73,6 +73,7 @@ Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
+          ...(Array.isArray(history) ? history.map((h: any) => ({ role: h.role === "user" ? "user" : "assistant", content: h.content })) : []),
           { role: "user", content: message },
         ],
         tools: [

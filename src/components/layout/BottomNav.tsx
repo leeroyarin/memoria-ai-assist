@@ -1,9 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Brain, Bell, Settings } from "lucide-react";
+import { Home, MessageCircle, Brain, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
+  { to: "/chat", icon: MessageCircle, label: "Chat" },
   { to: "/memories", icon: Brain, label: "Memories" },
   { to: "/reminders", icon: Bell, label: "Reminders" },
   { to: "/settings", icon: Settings, label: "Settings" },
