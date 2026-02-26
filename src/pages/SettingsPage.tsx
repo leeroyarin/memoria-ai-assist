@@ -4,6 +4,9 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const SettingRow = ({
   icon: Icon,
@@ -31,6 +34,19 @@ const SettingRow = ({
 );
 
 const SettingsPage = () => {
+  const { user, signOut } = useAuthContext();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({ variant: "destructive", title: "Error signing out", description: error.message });
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       <div>
@@ -49,23 +65,19 @@ const SettingsPage = () => {
           </SettingRow>
           <Separator />
           <SettingRow icon={Mic} label="Default Alarm Sound" description="Buzzer">
-            <Button variant="ghost" size="sm" className="text-primary text-xs">
-              Change
-            </Button>
+            <Button variant="ghost" size="sm" className="text-primary text-xs">Change</Button>
           </SettingRow>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="p-4">
-          <SettingRow icon={User} label="Account" description="Not signed in">
-            <Button variant="outline" size="sm" className="text-xs">
-              Sign in
-            </Button>
+          <SettingRow icon={User} label="Account" description={user?.email ?? "Not signed in"}>
+            <span className="text-xs text-muted-foreground">Signed in</span>
           </SettingRow>
           <Separator />
           <div className="pt-3">
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-destructive">
+            <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-destructive" onClick={handleSignOut}>
               <LogOut className="h-4 w-4" />
               Sign out
             </Button>
