@@ -2,6 +2,7 @@ import { Mic } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useVoiceInput, type VoiceState } from "@/hooks/useVoiceInput";
+import ReminderConfirmDialog from "@/components/ReminderConfirmDialog";
 
 const stateLabels: Record<VoiceState, string> = {
   idle: "",
@@ -9,11 +10,15 @@ const stateLabels: Record<VoiceState, string> = {
   processing: "Processing...",
   thinking: "AI is thinking...",
   speaking: "Speaking...",
+  confirming: "",
 };
 
 const MicButton = () => {
-  const { voiceState, lastResponse, startListening, stopAndProcess, partialTranscript } = useVoiceInput();
-  const isActive = voiceState !== "idle";
+  const {
+    voiceState, lastResponse, startListening, stopAndProcess,
+    partialTranscript, pendingReminder, confirmReminder, cancelReminder,
+  } = useVoiceInput();
+  const isActive = voiceState !== "idle" && voiceState !== "confirming";
 
   const handleToggle = () => {
     if (voiceState === "idle") {
@@ -62,6 +67,15 @@ const MicButton = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {pendingReminder && (
+        <ReminderConfirmDialog
+          open={voiceState === "confirming"}
+          reminder={pendingReminder}
+          onConfirm={confirmReminder}
+          onCancel={cancelReminder}
+        />
+      )}
 
       <button
         onClick={handleToggle}
