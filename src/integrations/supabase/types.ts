@@ -14,7 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      memories: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          id: string
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          default_alarm_sound: string | null
+          id: string
+          notifications_enabled: boolean | null
+          updated_at: string
+          voice_feedback_enabled: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          default_alarm_sound?: string | null
+          id: string
+          notifications_enabled?: boolean | null
+          updated_at?: string
+          voice_feedback_enabled?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          default_alarm_sound?: string | null
+          id?: string
+          notifications_enabled?: boolean | null
+          updated_at?: string
+          voice_feedback_enabled?: boolean | null
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          alarm_sound: string | null
+          created_at: string
+          id: string
+          memory_id: string | null
+          priority: string
+          status: string
+          title: string
+          trigger_context: string | null
+          trigger_time: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          alarm_sound?: string | null
+          created_at?: string
+          id?: string
+          memory_id?: string | null
+          priority?: string
+          status?: string
+          title: string
+          trigger_context?: string | null
+          trigger_time?: string | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          alarm_sound?: string | null
+          created_at?: string
+          id?: string
+          memory_id?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          trigger_context?: string | null
+          trigger_time?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_memory_id_fkey"
+            columns: ["memory_id"]
+            isOneToOne: false
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
