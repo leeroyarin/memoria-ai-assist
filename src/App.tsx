@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Memories from "./pages/Memories";
 import Reminders from "./pages/Reminders";
 import SettingsPage from "./pages/SettingsPage";
+import ChatPage from "./pages/ChatPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
               }
             >
               <Route path="/" element={<Index />} />
+              <Route path="/chat" element={<ChatPage />} />
               <Route path="/memories" element={<Memories />} />
               <Route path="/reminders" element={<Reminders />} />
               <Route path="/settings" element={<SettingsPage />} />
