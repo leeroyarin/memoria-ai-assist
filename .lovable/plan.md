@@ -1,58 +1,67 @@
 
 
-## Voice-Activated Memory & Reminder System — Web Prototype
+## Next Phase: Database, Auth, ElevenLabs Voice & AI
 
-### 1. Enable Lovable Cloud & AI
-- Set up Lovable Cloud for backend (database, auth, edge functions)
-- Enable Lovable AI for the "Middle Man" intelligence
-- Connect ElevenLabs for STT and TTS via connector
+This phase covers three major areas: (1) database schema + authentication, (2) ElevenLabs STT/TTS voice integration, and (3) AI Middle Man edge function. Here is the implementation plan:
 
-### 2. Authentication & Database
-- Implement email-based login/signup with Supabase Auth
-- Create `profiles` table for user preferences (default alarm sound, wake word preference)
-- Create `memories` table (id, user_id, content, category, tags, created_at)
-- Create `reminders` table (id, user_id, memory_id, type: time|activity, trigger_time, trigger_context, alarm_sound, priority: normal|high, status: pending|done|dismissed, created_at)
-- Set up RLS so users only access their own data
+---
 
-### 3. Core Layout & Navigation
-- Mobile-first responsive layout with bottom navigation
-- Pages: Home/Dashboard, Memories, Reminders, Settings
-- Persistent floating mic button for voice input
+### 1. Database Schema & RLS
 
-### 4. Voice Interaction System
-- **Speech-to-Text**: ElevenLabs STT edge function for transcribing voice input
-- **Text-to-Speech**: ElevenLabs TTS edge function for AI spoken responses
-- Mic button with recording state UI (pulsing animation, "Listening..." state)
-- Visual feedback during API chain: "Listening..." → "Processing..." → "AI is thinking..." → spoken response
+Create three tables via migration:
 
-### 5. Memory Bank (Digital Notes)
-- Voice-to-note: speak a note, it gets transcribed and saved
-- List view of all memories with search and category filters
-- Categories auto-suggested by AI (e.g., Personal, Work, Shopping, Health)
-- Manual edit/delete capabilities
+- **profiles** (`id` uuid PK → auth.users, `default_alarm_sound` text, `voice_feedback_enabled` boolean, `notifications_enabled` boolean, `created_at`, `updated_at`)
+- **memories** (`id` uuid PK, `user_id` uuid → profiles, `content` text, `category` text, `tags` text[], `created_at`)
+- **reminders** (`id` uuid PK, `user_id` uuid → profiles, `memory_id` uuid nullable → memories, `title` text, `type` text check time|activity, `trigger_time` timestamptz nullable, `trigger_context` text nullable, `alarm_sound` text nullable, `priority` text default 'normal', `status` text default 'pending', `created_at`)
 
-### 6. Reminder System
-- **Time-based**: "Remind me in 10 minutes to check the oven" → parsed by AI into scheduled reminder
-- **Activity-based**: "After I finish eating, remind me to call Mom" → stored with context trigger, surfaced via AI check-ins
-- AI edge function parses natural language commands to extract: reminder text, type, trigger time/context, priority level
-- Reminder list with status (pending/done/dismissed) and ability to snooze or dismiss
-- Browser notifications for time-based reminders (with permission prompt)
-- Visual + audio alerts with customizable alarm sounds (selection UI in settings)
+RLS policies: users can only SELECT/INSERT/UPDATE/DELETE their own rows on all three tables. Auto-create profile on signup via trigger.
 
-### 7. AI "Middle Man" Proactive Assistant
-- Edge function that fetches user's recent memories and pending reminders
-- "Am I forgetting anything?" voice command triggers AI synthesis
-- AI analyzes context and provides spoken summary of pending tasks and suggestions
-- Dashboard widget showing AI-generated daily overview
+### 2. Authentication
 
-### 8. Settings Page
-- Default alarm sound selection (from preset library)
-- Notification preferences
-- Voice feedback toggle (TTS on/off)
-- Account management
+- Create `src/pages/AuthPage.tsx` with email login/signup form (tab toggle)
+- Create `src/hooks/useAuth.ts` hook wrapping `supabase.auth`
+- Add auth context provider and protected route wrapper
+- Wire Settings page sign-in/sign-out buttons to real auth
+- Redirect unauthenticated users to `/auth`
 
-### 9. Modular Architecture (for future mobile extraction)
-- API calls abstracted into separate service files: `api/voice.ts`, `api/ai.ts`, `api/db.ts`
-- Business logic in custom hooks: `useVoiceInput`, `useReminders`, `useMemories`, `useAIAssistant`
-- UI components fully decoupled from data logic
+### 3. ElevenLabs Voice (STT + TTS)
+
+- Connect ElevenLabs via connector (will prompt for API key)
+- Install `@elevenlabs/react` for realtime STT
+- Create edge functions:
+  - `elevenlabs-scribe-token` — generates single-use realtime STT token
+  - `elevenlabs-tts` — converts AI response text to speech audio
+- Create `src/api/voice.ts` service abstraction
+- Create `src/hooks/useVoiceInput.ts` hook using `useScribe` for mic recording
+- Wire MicButton to real voice pipeline: record → transcribe → process → respond
+
+### 4. AI Middle Man Edge Function
+
+- Create `supabase/functions/ai-assistant/index.ts` using Lovable AI (gemini-3-flash-preview)
+- Accepts user's transcribed text + fetches their memories/reminders from DB
+- Determines intent: save memory, create reminder, or answer "Am I forgetting anything?"
+- Returns structured response (action + data + spoken reply text)
+- Create `src/api/ai.ts` service abstraction
+- Create `src/hooks/useAIAssistant.ts` hook
+
+### 5. Wire Everything Together
+
+- MicButton flow: Listening → transcribe (STT) → AI processes → save to DB → speak response (TTS)
+- Update Memories page to fetch/display real data with search
+- Update Reminders page to fetch/display real data with tabs filtering
+- Update Dashboard with live counts and recent activity
+- Add visual states: "Listening..." → "Processing..." → "AI is thinking..." → spoken response
+
+### 6. Modular Architecture
+
+All API calls abstracted into `src/api/` files, all business logic in `src/hooks/`, UI components decoupled from data.
+
+---
+
+### Technical Notes
+
+- ElevenLabs connector will be used for STT/TTS API key management
+- Lovable AI (no extra API key needed) powers the Middle Man via `gemini-3-flash-preview`
+- `verify_jwt = false` on edge functions with manual auth validation in code
+- Browser notifications for time-based reminders via Notification API with permission prompt
 
