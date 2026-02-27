@@ -36,7 +36,7 @@ serve(async (req) => {
     // Fetch user context
     const [memoriesRes, remindersRes] = await Promise.all([
       supabase.from("memories").select("content, category, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("reminders").select("title, type, trigger_time, trigger_context, status, priority").eq("user_id", userId).eq("status", "pending").order("created_at", { ascending: false }).limit(20),
+      supabase.from("reminders").select("id, title, type, trigger_time, trigger_context, status, priority").eq("user_id", userId).eq("status", "pending").order("created_at", { ascending: false }).limit(20),
     ]);
 
     const memories = memoriesRes.data || [];
@@ -50,16 +50,18 @@ User's recent memories:
 ${memories.length ? memories.map(m => `- [${m.category || 'uncategorized'}] ${m.content}`).join("\n") : "None yet."}
 
 User's pending reminders:
-${reminders.length ? reminders.map(r => `- [${r.type}/${r.priority}] ${r.title}${r.trigger_time ? ` (at ${r.trigger_time})` : ""}${r.trigger_context ? ` (after: ${r.trigger_context})` : ""}`).join("\n") : "None yet."}
+${reminders.length ? reminders.map(r => `- [id:${r.id}] [${r.type}/${r.priority}] ${r.title}${r.trigger_time ? ` (at ${r.trigger_time})` : ""}${r.trigger_context ? ` (after: ${r.trigger_context})` : ""}`).join("\n") : "None yet."}
 
 Analyze the user's message and respond using the suggest_action tool. Determine the intent:
 - "save_memory": user wants to remember/note something
 - "create_reminder": user wants to be reminded about something
+- "complete_reminder": user says they finished/completed a task that matches a pending reminder
 - "summary": user asks "am I forgetting anything?" or wants an overview
 - "chat": general conversation or question
 
 For save_memory, extract content, suggest a category (Personal/Work/Shopping/Health/Finance/Other), and relevant tags.
 For create_reminder, extract title, determine if time-based or activity-based, extract trigger_time (ISO format) or trigger_context, and priority.
+For complete_reminder, match the user's statement against pending reminders and return the reminder_id of the matching one.
 For summary, analyze their memories and reminders and provide a helpful spoken overview.
 Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text-to-speech.`;
 
@@ -85,7 +87,7 @@ Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text
               parameters: {
                 type: "object",
                 properties: {
-                  action: { type: "string", enum: ["save_memory", "create_reminder", "summary", "chat"] },
+                  action: { type: "string", enum: ["save_memory", "create_reminder", "complete_reminder", "summary", "chat"] },
                   data: {
                     type: "object",
                     properties: {
@@ -97,6 +99,7 @@ Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text
                       trigger_time: { type: "string" },
                       trigger_context: { type: "string" },
                       priority: { type: "string", enum: ["normal", "high"] },
+                      reminder_id: { type: "string", description: "The id of the reminder to mark as done" },
                     },
                   },
                   spoken_reply: { type: "string" },

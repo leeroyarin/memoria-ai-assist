@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { processWithAI, type AIResponse } from "@/api/ai";
-import { createMemory, createReminder } from "@/api/db";
+import { createMemory, createReminder, updateReminderStatus } from "@/api/db";
 import ReminderConfirmDialog, { type PendingReminder } from "@/components/ReminderConfirmDialog";
 import { cn } from "@/lib/utils";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
@@ -54,6 +54,9 @@ const ChatPage = () => {
           tags: aiResult.data.tags,
         });
         toast({ title: "Memory saved" });
+      } else if (aiResult.action === "complete_reminder" && aiResult.data?.reminder_id) {
+        await updateReminderStatus(aiResult.data.reminder_id, "done");
+        toast({ title: "Reminder completed ✓" });
       } else if (aiResult.action === "create_reminder" && aiResult.data?.title) {
         setPendingReminder({
           title: aiResult.data.title,

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AIResponse {
-  action: "save_memory" | "create_reminder" | "summary" | "chat";
+  action: "save_memory" | "create_reminder" | "complete_reminder" | "summary" | "chat";
   data?: {
     content?: string;
     category?: string;
@@ -11,6 +11,7 @@ export interface AIResponse {
     trigger_time?: string;
     trigger_context?: string;
     priority?: "normal" | "high";
+    reminder_id?: string;
   };
   spoken_reply: string;
 }
