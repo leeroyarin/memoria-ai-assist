@@ -1,35 +1,35 @@
 
 
-## Add Manual Memory/Reminder Creation + Fix Bottom Nav Overlap
+## UI Layout and Interaction Fixes
 
-Three changes: add manual add buttons to Memories and Reminders pages, support offline queuing, and fix content being hidden behind the bottom nav.
+Three issues to address: (1) Chat input hidden behind bottom nav, (2) Mic button positioning, (3) Add multi-option FAB for Memories/Reminders pages.
 
 ### Changes
 
-**1. Fix bottom nav content overlap — `src/components/layout/AppLayout.tsx`**
-- Increase `pb-20` to `pb-24` or `pb-28` to ensure all page content scrolls above the bottom nav and mic button
+**1. Fix Chat page layout — `src/pages/ChatPage.tsx`**
+- Change the container from `h-[calc(100vh-5rem)]` to account for bottom nav height (~4.5rem nav + 1.5rem padding)
+- Make the input bar fixed/sticky just above the bottom nav (e.g., `fixed bottom-[4.5rem]`) so it's always visible without scrolling
+- Adjust the message scroll area to leave room for the fixed input bar
 
-**2. Create `src/components/AddMemoryDialog.tsx`**
-- Drawer/dialog with fields: content (textarea), category (select: Personal/Work/Shopping/Health/Finance/Other), tags (comma-separated input)
-- On submit: call `createMemory()` directly, invalidate queries, show toast
-- Offline support: if `createMemory` fails due to network, save to `localStorage` queue and show "Saved offline — will sync when online" toast
+**2. Reposition Mic button — `src/components/layout/MicButton.tsx`**
+- Move from `fixed bottom-20 left-1/2 -translate-x-1/2` (centered) to `fixed bottom-[4.5rem] right-4` (bottom-right, above the nav bar) for better thumb reachability
+- Slightly smaller or same size, positioned to the right so it doesn't overlap content
 
-**3. Create `src/components/AddReminderDialog.tsx`**
-- Drawer/dialog with fields: title, type toggle (time/activity), trigger_time (datetime-local) or trigger_context (text), priority toggle
-- On submit: call `createReminder()` directly, invalidate queries, show toast
-- Same offline queue fallback as memories
+**3. Replace single + button with expandable FAB — `src/pages/Memories.tsx` and `src/pages/Reminders.tsx`**
+- Remove the header + button
+- Add a floating action button (bottom-right, above mic button area) that expands on tap to show 2-3 options:
+  - **Manual** (Plus icon) — opens the existing AddMemoryDialog / AddReminderDialog
+  - **Voice** (Mic icon) — triggers voice input via `useVoiceInput().startListening()`
+  - **Chat** (MessageCircle icon) — navigates to `/chat`
+- Use framer-motion for the expand/collapse animation
+- Create a shared `FloatingActions` component used by both pages
 
-**4. Update `src/pages/Memories.tsx`**
-- Add a floating `+` button (or header button) that opens `AddMemoryDialog`
+**4. Adjust `AppLayout.tsx`**
+- On `/chat` route, hide the global MicButton (already done) and ensure the layout padding works with the new fixed chat input
 
-**5. Update `src/pages/Reminders.tsx`**
-- Add a floating `+` button (or header button) that opens `AddReminderDialog`
-
-**6. Create `src/hooks/useOfflineSync.ts`**
-- On mount, check `localStorage` for queued items
-- Listen for `online` event; when back online, flush queued memories/reminders to the database and invalidate queries
-- Queue structure: `{ type: "memory" | "reminder", data: {...}, timestamp: number }[]`
-
-**7. Wire offline sync in `src/components/layout/AppLayout.tsx`**
-- Call `useOfflineSync()` at the layout level so it runs globally
+### Component: `src/components/FloatingActions.tsx`
+- Props: `onManualAdd`, `onVoice` (optional), `showVoice` (default true)
+- Renders a FAB at bottom-right above nav
+- On tap, expands upward showing 3 small circular buttons: Manual (+), Voice (Mic), Chat (navigate)
+- Tap outside or tap main button again to collapse
 
