@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useScribe, CommitStrategy } from "@elevenlabs/react";
 import { getScribeToken, textToSpeech } from "@/api/voice";
 import { processWithAI, type AIResponse } from "@/api/ai";
-import { createMemory, createReminder } from "@/api/db";
+import { createMemory, createReminder, updateReminderStatus } from "@/api/db";
 import { useToast } from "@/hooks/use-toast";
 import type { PendingReminder } from "@/components/ReminderConfirmDialog";
 
@@ -65,6 +65,9 @@ export function useVoiceInput() {
           category: aiResult.data.category,
           tags: aiResult.data.tags,
         });
+      } else if (aiResult.action === "complete_reminder" && aiResult.data?.reminder_id) {
+        await updateReminderStatus(aiResult.data.reminder_id, "done");
+        toast({ title: "Reminder completed ✓" });
       } else if (aiResult.action === "create_reminder" && aiResult.data?.title) {
         // Store pending reminder instead of saving directly
         setPendingReminder({
