@@ -8,6 +8,7 @@ import { createMemory, createReminder, updateReminderStatus } from "@/api/db";
 import ReminderConfirmDialog, { type PendingReminder } from "@/components/ReminderConfirmDialog";
 import { cn } from "@/lib/utils";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { motion } from "framer-motion";
 
 interface ChatMessage {
   id: string;
@@ -104,66 +105,81 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <h1 className="text-lg font-semibold px-1 pb-3">Chat</h1>
+    <div className="flex flex-col h-[calc(100dvh-1.5rem)]">
+      <h1 className="font-display text-xl font-bold px-1 pb-3">Chat</h1>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 pb-20 pr-1">
-        {messages.map((msg) => (
-          <div
+      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 pb-28 pr-1 scrollbar-thin">
+        {messages.map((msg, i) => (
+          <motion.div
             key={msg.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i === 0 ? 0 : 0.05 }}
             className={cn(
-              "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+              "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
               msg.role === "user"
-                ? "ml-auto bg-primary text-primary-foreground rounded-br-md"
-                : "mr-auto bg-muted text-foreground rounded-bl-md"
+                ? "ml-auto bg-primary text-primary-foreground rounded-br-sm"
+                : "mr-auto bg-card text-card-foreground border border-border rounded-bl-sm"
             )}
           >
             {msg.content}
-          </div>
+          </motion.div>
         ))}
         {loading && (
-          <div className="mr-auto flex items-center gap-2 rounded-2xl bg-muted px-4 py-2.5 text-sm text-muted-foreground rounded-bl-md">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mr-auto flex items-center gap-2 rounded-2xl bg-card border border-border px-4 py-3 text-sm text-muted-foreground rounded-bl-sm shadow-sm"
+          >
             <Loader2 className="h-4 w-4 animate-spin" />
             Thinking…
-          </div>
+          </motion.div>
         )}
       </div>
 
-      <div className="fixed bottom-[4.5rem] left-0 right-0 z-30 mx-auto max-w-lg px-4 pb-2 pt-2 bg-background border-t border-border">
-        <div className="flex items-center gap-2">
-          {voice.voiceState === "listening" ? (
-            <div className="flex-1 flex items-center gap-2 text-sm text-destructive animate-pulse px-3">
+      <div className="fixed bottom-[4rem] left-0 right-0 z-30">
+        <div className="mx-auto max-w-lg px-4 pb-3 pt-2">
+          <div className="flex items-center gap-2 rounded-2xl bg-card border border-border p-1.5 shadow-lg">
+            {voice.voiceState === "listening" ? (
+              <div className="flex-1 flex items-center gap-2 text-sm text-destructive animate-pulse px-3 py-2">
+                <Mic className="h-4 w-4" />
+                <span>{voice.partialTranscript || "Listening..."}</span>
+              </div>
+            ) : (
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a message…"
+                disabled={loading}
+                className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 h-9"
+              />
+            )}
+            <Button
+              size="icon"
+              variant={voice.voiceState === "listening" ? "destructive" : "ghost"}
+              className="h-9 w-9 rounded-xl shrink-0"
+              onClick={() => {
+                if (voice.voiceState === "idle") {
+                  voice.startListening();
+                } else if (voice.voiceState === "listening") {
+                  const text = voice.stopAndGetTranscript();
+                  if (text) setInput(text);
+                }
+              }}
+              disabled={loading || (voice.voiceState !== "idle" && voice.voiceState !== "listening")}
+            >
               <Mic className="h-4 w-4" />
-              <span>{voice.partialTranscript || "Listening..."}</span>
-            </div>
-          ) : (
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message…"
-              disabled={loading}
-              className="flex-1"
-            />
-          )}
-          <Button
-            size="icon"
-            variant={voice.voiceState === "listening" ? "destructive" : "outline"}
-            onClick={() => {
-              if (voice.voiceState === "idle") {
-                voice.startListening();
-              } else if (voice.voiceState === "listening") {
-                const text = voice.stopAndGetTranscript();
-                if (text) setInput(text);
-              }
-            }}
-            disabled={loading || (voice.voiceState !== "idle" && voice.voiceState !== "listening")}
-          >
-            <Mic className="h-4 w-4" />
-          </Button>
-          <Button size="icon" onClick={sendMessage} disabled={!input.trim() || loading}>
-            <Send className="h-4 w-4" />
-          </Button>
+            </Button>
+            <Button
+              size="icon"
+              className="h-9 w-9 rounded-xl shrink-0"
+              onClick={sendMessage}
+              disabled={!input.trim() || loading}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 

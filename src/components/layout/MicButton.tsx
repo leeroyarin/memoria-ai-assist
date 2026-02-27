@@ -95,12 +95,12 @@ const MicButton = () => {
         onClick={handleToggle}
         disabled={voiceState !== "idle" && voiceState !== "listening"}
         className={cn(
-          "fixed bottom-[4.5rem] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 disabled:opacity-50",
-          voiceState === "listening" && "animate-mic-pulse bg-destructive"
+          "fixed bottom-[4.5rem] right-5 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_4px_20px_hsl(var(--primary)/0.35)] transition-all active:scale-95 disabled:opacity-50",
+          voiceState === "listening" && "animate-mic-pulse bg-destructive shadow-[0_4px_20px_hsl(var(--destructive)/0.4)]"
         )}
         aria-label={voiceState === "idle" ? "Start voice input" : "Stop listening"}
       >
-        <Mic className="h-6 w-6" />
+        <Mic className="h-5 w-5" />
       </button>
     </>
   );
