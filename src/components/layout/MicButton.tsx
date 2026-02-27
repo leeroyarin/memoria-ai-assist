@@ -95,7 +95,7 @@ const MicButton = () => {
         onClick={handleToggle}
         disabled={voiceState !== "idle" && voiceState !== "listening"}
         className={cn(
-          "fixed bottom-20 left-1/2 z-50 -translate-x-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 disabled:opacity-50",
+          "fixed bottom-[4.5rem] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 disabled:opacity-50",
           voiceState === "listening" && "animate-mic-pulse bg-destructive"
         )}
         aria-label={voiceState === "idle" ? "Start voice input" : "Stop listening"}
