@@ -1,21 +1,24 @@
 
 
-## Replace FAB with Fixed VOICE / MANUAL Buttons on Memories & Reminders
+## Create PHASES.md Document
 
-Based on the screenshot, replace the expandable floating action button with two side-by-side fixed buttons ("VOICE" and "MANUAL") pinned just above the bottom nav, visible only on Memories and Reminders pages.
+Create a single `PHASES.md` file at the project root documenting Phase 3 (Native Mobile Migration) with milestones, deliverables, timeline, and a brief summary of completed phases for context.
 
-### Changes
+### Content Structure
 
-**1. Update `src/components/FloatingActions.tsx`**
-- Replace the expandable FAB with two fixed rectangular buttons side-by-side
-- Left button: "VOICE" (primary/purple with border styling) — calls `onVoice`
-- Right button: "MANUAL" (outlined/bordered) — calls `onManualAdd`
-- Position: `fixed bottom-[4.5rem]` with horizontal padding, spanning the content width
-- Remove the expand/collapse logic, overlay, and chat navigation option
+**Phase 1 & 2 Summary** (completed/current)
+- Phase 1: Architecture planning, service layer isolation
+- Phase 2: Web prototype — voice input, AI processing, memories, reminders, chat UI
 
-**2. Update `src/components/layout/MicButton.tsx`**
-- Hide the global mic button on `/memories` and `/reminders` routes (since voice is now handled by the page-level VOICE button)
+**Phase 3: Native Mobile Migration** (detailed breakdown)
+- **3.1 — Foundation (Weeks 1-2)**: Capacitor/React Native setup, project scaffolding, CI/CD pipeline
+- **3.2 — Core Native Features (Weeks 3-5)**: Push notifications, background voice processing, biometric auth
+- **3.3 — Offline-First (Weeks 6-7)**: Local SQLite storage, sync engine, conflict resolution
+- **3.4 — Polish & Platform (Weeks 8-9)**: Platform-specific UI tweaks (iOS/Android), haptic feedback, app icons/splash screens
+- **3.5 — Store Submission (Week 10)**: App Store & Play Store listing, beta testing, compliance review
 
-**3. Update `src/pages/Memories.tsx` and `src/pages/Reminders.tsx`**
-- No structural changes needed — they already use `<FloatingActions>` with `onManualAdd` and `onVoice` props
+Each milestone includes deliverables, acceptance criteria, and dependencies.
+
+### File
+- `PHASES.md` — new file at project root
 
