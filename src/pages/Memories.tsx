@@ -1,4 +1,4 @@
-import { Brain, Search, Trash2 } from "lucide-react";
+import { Brain, Search, Trash2, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,10 +6,12 @@ import { motion } from "framer-motion";
 import { useMemories } from "@/hooks/useMemories";
 import { useState } from "react";
 import { format } from "date-fns";
+import AddMemoryDialog from "@/components/AddMemoryDialog";
 
 const Memories = () => {
   const { data: memories, isLoading, remove } = useMemories();
   const [search, setSearch] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
 
   const filtered = memories?.filter(
     (m: any) =>
@@ -19,10 +21,17 @@ const Memories = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Memories</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Your digital brain</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Memories</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your digital brain</p>
+        </div>
+        <Button size="icon" onClick={() => setAddOpen(true)}>
+          <Plus className="h-5 w-5" />
+        </Button>
       </div>
+
+      <AddMemoryDialog open={addOpen} onOpenChange={setAddOpen} />
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
