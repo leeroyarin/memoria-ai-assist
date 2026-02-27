@@ -23,7 +23,7 @@ const Memories = () => {
   );
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5 pb-4">
       <div>
         <h1 className="font-display text-2xl font-bold">Memories</h1>
         <p className="mt-1 text-sm text-muted-foreground">Your digital brain</p>
@@ -33,7 +33,7 @@ const Memories = () => {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search memories..." className="pl-10" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input placeholder="Search memories..." className="pl-10 rounded-xl bg-card border-border" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       {isLoading ? (
@@ -41,37 +41,48 @@ const Memories = () => {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       ) : filtered && filtered.length > 0 ? (
-        <div className="space-y-2">
-          {filtered.map((m: any) => (
-            <Card key={m.id}>
-              <CardContent className="p-3 flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm">{m.content}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    {m.category && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">{m.category}</span>
-                    )}
-                    {m.tags?.map((tag: string) => (
-                      <span key={tag} className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">
-                        {tag}
-                      </span>
-                    ))}
-                    <span className="text-xs text-muted-foreground">{format(new Date(m.created_at), "MMM d, h:mm a")}</span>
+        <div className="space-y-3">
+          {filtered.map((m: any, i: number) => (
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+            >
+              <Card className="border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/30 transition-colors">
+                <CardContent className="p-4 flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm leading-relaxed">{m.content}</p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                      {m.category && (
+                        <span className="text-[11px] font-medium bg-primary/15 text-primary px-2.5 py-0.5 rounded-full">{m.category}</span>
+                      )}
+                      {m.tags?.map((tag: string) => (
+                        <span key={tag} className="text-[11px] bg-secondary text-secondary-foreground px-2.5 py-0.5 rounded-full">
+                          {tag}
+                        </span>
+                      ))}
+                      <span className="text-[11px] text-muted-foreground ml-auto">{format(new Date(m.created_at), "MMM d, h:mm a")}</span>
+                    </div>
                   </div>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => remove(m.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 rounded-lg" onClick={() => remove(m.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="border-dashed border-border/60">
           <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-            <Brain className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <Brain className="h-8 w-8 text-muted-foreground/50" />
+            </div>
             <p className="font-display font-semibold">No memories saved</p>
-            <p className="mt-1 text-sm text-muted-foreground">Speak a note using the mic button to save your first memory.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground max-w-[240px]">
+              Tap the + button or use voice to save your first memory.
+            </p>
           </CardContent>
         </Card>
       )}
