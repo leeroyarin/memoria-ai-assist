@@ -1,24 +1,51 @@
 
 
-## Create PHASES.md Document
+## Create API & AI Integration Documentation
 
-Create a single `PHASES.md` file at the project root documenting Phase 3 (Native Mobile Migration) with milestones, deliverables, timeline, and a brief summary of completed phases for context.
+Create a comprehensive `API_DOCUMENTATION.md` file at the project root covering all backend functions, database schema, client APIs, and AI integration details.
 
-### Content Structure
+### Document Structure
 
-**Phase 1 & 2 Summary** (completed/current)
-- Phase 1: Architecture planning, service layer isolation
-- Phase 2: Web prototype — voice input, AI processing, memories, reminders, chat UI
+**1. Authentication API**
+- Sign up, sign in, sign out via AuthContext
+- Session management and protected routes
 
-**Phase 3: Native Mobile Migration** (detailed breakdown)
-- **3.1 — Foundation (Weeks 1-2)**: Capacitor/React Native setup, project scaffolding, CI/CD pipeline
-- **3.2 — Core Native Features (Weeks 3-5)**: Push notifications, background voice processing, biometric auth
-- **3.3 — Offline-First (Weeks 6-7)**: Local SQLite storage, sync engine, conflict resolution
-- **3.4 — Polish & Platform (Weeks 8-9)**: Platform-specific UI tweaks (iOS/Android), haptic feedback, app icons/splash screens
-- **3.5 — Store Submission (Week 10)**: App Store & Play Store listing, beta testing, compliance review
+**2. Database Schema & Tables**
+- `profiles` — user settings (notifications, voice feedback, alarm sound)
+- `memories` — user memories (content, category, tags)
+- `reminders` — user reminders (title, type, trigger_time/context, priority, status)
+- Database functions: `handle_new_user`, `validate_reminder_type`
 
-Each milestone includes deliverables, acceptance criteria, and dependencies.
+**3. Client-Side Data API (`src/api/db.ts`)**
+- `fetchMemories()` — GET all memories ordered by date
+- `createMemory({ content, category?, tags? })` — INSERT memory
+- `deleteMemory(id)` — DELETE memory
+- `fetchReminders(filter?)` — GET reminders with optional type filter
+- `createReminder({ title, type, trigger_time?, trigger_context?, priority? })` — INSERT reminder
+- `updateReminderStatus(id, status)` — UPDATE reminder status
+- `fetchProfile()` — GET user profile
+- `fetchCounts()` — GET memory/reminder counts
+
+**4. Edge Functions (Backend)**
+- `elevenlabs-scribe-token` — generates single-use STT token
+- `elevenlabs-tts` — text-to-speech conversion, returns MP3 audio
+- `ai-assistant` — AI intent classification and response generation
+
+**5. AI Assistant Integration**
+- Request/response schema with tool-calling pattern
+- Intent types: save_memory, create_reminder, complete_reminder, summary, chat
+- System prompt structure with user context injection
+- Lovable AI Gateway usage (model: gemini-3-flash-preview)
+
+**6. Voice API (`src/api/voice.ts`)**
+- `getScribeToken()` — fetch STT token from edge function
+- `textToSpeech(text)` — call TTS edge function and play audio
+
+**7. Voice Input Flow (`useVoiceInput` hook)**
+- State machine: idle → listening → thinking → speaking → confirming → idle
+- ElevenLabs Scribe realtime WebSocket integration
+- Full processing pipeline documentation
 
 ### File
-- `PHASES.md` — new file at project root
+- `API_DOCUMENTATION.md` — new file at project root
 
