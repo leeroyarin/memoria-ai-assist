@@ -17,8 +17,10 @@ export interface AIResponse {
 }
 
 export async function processWithAI(transcribedText: string): Promise<AIResponse> {
+  const userLocalTime = new Date().toISOString();
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const { data, error } = await supabase.functions.invoke("ai-assistant", {
-    body: { message: transcribedText },
+    body: { message: transcribedText, userLocalTime, userTimezone },
   });
   if (error) throw new Error(error.message || "AI processing failed");
   return data as AIResponse;

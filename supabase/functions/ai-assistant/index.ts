@@ -31,7 +31,7 @@ serve(async (req) => {
     }
     const userId = claimsData.claims.sub;
 
-    const { message, history } = await req.json();
+    const { message, history, userLocalTime, userTimezone } = await req.json();
 
     // Fetch user context
     const [memoriesRes, remindersRes] = await Promise.all([
@@ -42,25 +42,31 @@ serve(async (req) => {
     const memories = memoriesRes.data || [];
     const reminders = remindersRes.data || [];
 
+    const localTimeStr = userLocalTime || new Date().toISOString();
+    const timezoneStr = userTimezone || "UTC";
+
     const systemPrompt = `You are a voice-activated memory and reminder assistant. The user speaks to you via voice.
 
-Current date/time: ${new Date().toISOString()}
+The user's current local date/time: ${localTimeStr}
+The user's timezone: ${timezoneStr}
+
+IMPORTANT: All relative time references the user makes (e.g. "today", "yesterday", "this morning", "last night", "tomorrow") MUST be interpreted relative to their local date/time and timezone shown above, NOT UTC. When saving memories, include the actual date/time the event occurred based on the user's local time. When creating reminders with times, convert to the correct absolute time respecting their timezone.
 
 User's recent memories:
-${memories.length ? memories.map(m => `- [${m.category || 'uncategorized'}] ${m.content}`).join("\n") : "None yet."}
+${memories.length ? memories.map(m => `- [${m.category || 'uncategorized'}] ${m.content} (saved: ${m.created_at})`).join("\n") : "None yet."}
 
 User's pending reminders:
 ${reminders.length ? reminders.map(r => `- [id:${r.id}] [${r.type}/${r.priority}] ${r.title}${r.trigger_time ? ` (at ${r.trigger_time})` : ""}${r.trigger_context ? ` (after: ${r.trigger_context})` : ""}`).join("\n") : "None yet."}
 
 Analyze the user's message and respond using the suggest_action tool. Determine the intent:
-- "save_memory": user wants to remember/note something
+- "save_memory": user wants to remember/note something. Include temporal context (when the event happened) in the content based on their local time.
 - "create_reminder": user wants to be reminded about something
 - "complete_reminder": user says they finished/completed a task that matches a pending reminder
 - "summary": user asks "am I forgetting anything?" or wants an overview
 - "chat": general conversation or question
 
-For save_memory, extract content, suggest a category (Personal/Work/Shopping/Health/Finance/Other), and relevant tags.
-For create_reminder, extract title, determine if time-based or activity-based, extract trigger_time (ISO format) or trigger_context, and priority.
+For save_memory, extract content (include when the event happened relative to user's local time), suggest a category (Personal/Work/Shopping/Health/Finance/Other), and relevant tags.
+For create_reminder, extract title, determine if time-based or activity-based, extract trigger_time (ISO format in user's timezone) or trigger_context, and priority.
 For complete_reminder, match the user's statement against pending reminders and return the reminder_id of the matching one.
 For summary, analyze their memories and reminders and provide a helpful spoken overview.
 Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text-to-speech.`;
