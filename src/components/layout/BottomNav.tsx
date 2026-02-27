@@ -14,8 +14,8 @@ const BottomNav = () => {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-background/90 backdrop-blur-xl pb-safe">
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background/95 backdrop-blur-xl pb-safe">
+      <div className="mx-auto grid max-w-lg grid-cols-5 py-1.5">
         {navItems.map(({ to, icon: Icon, label }) => {
           const isActive = location.pathname === to;
           return (
@@ -23,14 +23,14 @@ const BottomNav = () => {
               key={to}
               to={to}
               className={cn(
-                "flex flex-col items-center gap-0.5 rounded-xl px-4 py-1.5 text-xs transition-colors",
+                "flex flex-col items-center justify-center gap-0.5 py-1 text-[10px] transition-colors",
                 isActive
                   ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground/70 hover:text-foreground"
               )}
             >
-              <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5]")} />
-              <span className="font-medium">{label}</span>
+              <Icon className={cn("h-[18px] w-[18px]", isActive && "stroke-[2.5]")} />
+              <span className={cn("font-medium", isActive && "font-semibold")}>{label}</span>
             </NavLink>
           );
         })}
