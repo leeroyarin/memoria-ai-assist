@@ -1,24 +1,35 @@
 
 
-## Complete Reminder via Voice/Chat
+## Add Manual Memory/Reminder Creation + Fix Bottom Nav Overlap
 
-When a user tells the AI they've finished a task (e.g., "I just called Mom" or "I finished grocery shopping"), the AI should match it against pending reminders and mark the matching one(s) as done.
+Three changes: add manual add buttons to Memories and Reminders pages, support offline queuing, and fix content being hidden behind the bottom nav.
 
 ### Changes
 
-**1. Update `supabase/functions/ai-assistant/index.ts`**
-- Include reminder `id` in the fetched reminders data so the AI can reference specific reminders
-- Add `"complete_reminder"` as a new action enum value
-- Add `reminder_id` to the tool's data properties so the AI returns which reminder to mark done
-- Update system prompt to instruct the AI: when the user says they've done something that matches a pending reminder, use action `"complete_reminder"` with the matching `reminder_id`
+**1. Fix bottom nav content overlap — `src/components/layout/AppLayout.tsx`**
+- Increase `pb-20` to `pb-24` or `pb-28` to ensure all page content scrolls above the bottom nav and mic button
 
-**2. Update `src/api/ai.ts`**
-- Add `"complete_reminder"` to the `AIResponse.action` type
-- Add `reminder_id?: string` to the `data` interface
+**2. Create `src/components/AddMemoryDialog.tsx`**
+- Drawer/dialog with fields: content (textarea), category (select: Personal/Work/Shopping/Health/Finance/Other), tags (comma-separated input)
+- On submit: call `createMemory()` directly, invalidate queries, show toast
+- Offline support: if `createMemory` fails due to network, save to `localStorage` queue and show "Saved offline — will sync when online" toast
 
-**3. Update `src/pages/ChatPage.tsx`**
-- Handle `action === "complete_reminder"`: call `updateReminderStatus(reminder_id, "done")` and show a toast
+**3. Create `src/components/AddReminderDialog.tsx`**
+- Drawer/dialog with fields: title, type toggle (time/activity), trigger_time (datetime-local) or trigger_context (text), priority toggle
+- On submit: call `createReminder()` directly, invalidate queries, show toast
+- Same offline queue fallback as memories
 
-**4. Update `src/hooks/useVoiceInput.ts`**
-- Handle `action === "complete_reminder"`: call `updateReminderStatus(reminder_id, "done")` and show a toast
+**4. Update `src/pages/Memories.tsx`**
+- Add a floating `+` button (or header button) that opens `AddMemoryDialog`
+
+**5. Update `src/pages/Reminders.tsx`**
+- Add a floating `+` button (or header button) that opens `AddReminderDialog`
+
+**6. Create `src/hooks/useOfflineSync.ts`**
+- On mount, check `localStorage` for queued items
+- Listen for `online` event; when back online, flush queued memories/reminders to the database and invalidate queries
+- Queue structure: `{ type: "memory" | "reminder", data: {...}, timestamp: number }[]`
+
+**7. Wire offline sync in `src/components/layout/AppLayout.tsx`**
+- Call `useOfflineSync()` at the layout level so it runs globally
 
