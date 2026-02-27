@@ -1,4 +1,4 @@
-import { Bell, Clock, Activity, Check, X } from "lucide-react";
+import { Bell, Clock, Activity, Check, X, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useReminders } from "@/hooks/useReminders";
 import { format } from "date-fns";
 import { useState } from "react";
+import AddReminderDialog from "@/components/AddReminderDialog";
 
 const ReminderCard = ({ reminder, onDone, onDismiss }: { reminder: any; onDone: () => void; onDismiss: () => void }) => (
   <Card>
@@ -63,12 +64,20 @@ const ReminderList = ({ filter }: { filter?: "time" | "activity" }) => {
 };
 
 const Reminders = () => {
+  const [addOpen, setAddOpen] = useState(false);
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Reminders</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Never forget again</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Reminders</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Never forget again</p>
+        </div>
+        <Button size="icon" onClick={() => setAddOpen(true)}>
+          <Plus className="h-5 w-5" />
+        </Button>
       </div>
+
+      <AddReminderDialog open={addOpen} onOpenChange={setAddOpen} />
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="w-full">
