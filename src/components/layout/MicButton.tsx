@@ -17,6 +17,7 @@ const stateLabels: Record<VoiceState, string> = {
 const MicButton = () => {
   const location = useLocation();
   const isChatPage = location.pathname === "/chat";
+  const isMemoriesOrReminders = location.pathname === "/memories" || location.pathname === "/reminders";
   const {
     voiceState, lastResponse, startListening, stopAndProcess,
     partialTranscript, pendingReminder, confirmReminder, cancelReminder,
@@ -31,7 +32,7 @@ const MicButton = () => {
     }
   };
 
-  if (isChatPage) {
+  if (isChatPage || isMemoriesOrReminders) {
     return pendingReminder ? (
       <ReminderConfirmDialog
         open={voiceState === "confirming"}
