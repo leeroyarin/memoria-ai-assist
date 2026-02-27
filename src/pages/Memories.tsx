@@ -1,4 +1,4 @@
-import { Brain, Search, Trash2, Plus } from "lucide-react";
+import { Brain, Search, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,11 +7,14 @@ import { useMemories } from "@/hooks/useMemories";
 import { useState } from "react";
 import { format } from "date-fns";
 import AddMemoryDialog from "@/components/AddMemoryDialog";
+import FloatingActions from "@/components/FloatingActions";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 const Memories = () => {
   const { data: memories, isLoading, remove } = useMemories();
   const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
+  const voice = useVoiceInput();
 
   const filtered = memories?.filter(
     (m: any) =>
@@ -21,14 +24,9 @@ const Memories = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Memories</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Your digital brain</p>
-        </div>
-        <Button size="icon" onClick={() => setAddOpen(true)}>
-          <Plus className="h-5 w-5" />
-        </Button>
+      <div>
+        <h1 className="font-display text-2xl font-bold">Memories</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Your digital brain</p>
       </div>
 
       <AddMemoryDialog open={addOpen} onOpenChange={setAddOpen} />
@@ -77,6 +75,11 @@ const Memories = () => {
           </CardContent>
         </Card>
       )}
+
+      <FloatingActions
+        onManualAdd={() => setAddOpen(true)}
+        onVoice={() => voice.startListening()}
+      />
     </motion.div>
   );
 };
