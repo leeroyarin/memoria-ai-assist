@@ -1,27 +1,31 @@
 
 
-## Add Chat Interface
+## Rearrange Mic Button to Avoid Chat Overlap
 
-Add a text-based chat page as an alternative to voice input, allowing conversational interaction with the AI assistant. The chat will use the existing `ai-assistant` edge function and support the same actions (save memory, create reminder, summary, general chat).
+The floating mic button at `bottom-20` overlaps with the chat page's text input, creating a poor UX. The fix: hide the global mic button on the `/chat` route and instead embed a mic icon directly inside the chat input bar.
 
 ### Changes
 
-**1. Create `src/pages/ChatPage.tsx`**
-- Full-screen chat UI with scrollable message list and fixed input bar at bottom (above bottom nav)
-- Messages rendered with user/assistant bubbles
-- On send: call `ai-assistant` edge function with the user's text message
-- Handle `create_reminder` responses by showing the `ReminderConfirmDialog`
-- Handle `save_memory` responses by auto-saving and showing a toast
-- Display the `spoken_reply` as the assistant's chat bubble
-- Maintain conversation history in local state (messages array)
+**1. `src/components/layout/MicButton.tsx`**
+- Use `useLocation()` to detect the current route
+- Hide the entire mic button when on `/chat`
 
-**2. Update `src/components/layout/BottomNav.tsx`**
-- Add a "Chat" nav item (MessageCircle icon) between Home and Memories
+**2. `src/pages/ChatPage.tsx`**
+- Add a mic icon button inside the input bar (next to the Send button)
+- Wire it to the same voice pipeline (`useVoiceInput` hook)
+- When recording, show the listening overlay inline or replace the input area with a "Listening..." indicator
+- After transcription, auto-fill the text into the chat input (instead of processing directly), letting the user review before sending — or process directly with the same flow
 
-**3. Update `src/App.tsx`**
-- Add `/chat` route inside the protected layout
+**3. `src/components/layout/BottomNav.tsx`**
+- No changes needed; the nav stays as-is
 
-**4. Update `supabase/functions/ai-assistant/index.ts`**
-- Add optional `history` array parameter to accept prior conversation context
-- Include history in the AI prompt for multi-turn conversation support
+### Flow on Chat Page
+```text
+Input bar: [  Type a message...  ] [🎤] [➤]
+  - Tap 🎤 → starts listening → input shows "Listening..."
+  - Speech transcribed → text placed in input field → user can edit or tap Send
+  - OR: process immediately like voice flow (AI → response bubble)
+```
+
+This keeps the global mic button available on all other pages (Home, Memories, Reminders, Settings) while giving the chat page a clean, integrated experience.
 
