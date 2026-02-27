@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useVoiceInput, type VoiceState } from "@/hooks/useVoiceInput";
 import ReminderConfirmDialog from "@/components/ReminderConfirmDialog";
+import { useLocation } from "react-router-dom";
 
 const stateLabels: Record<VoiceState, string> = {
   idle: "",
@@ -14,6 +15,8 @@ const stateLabels: Record<VoiceState, string> = {
 };
 
 const MicButton = () => {
+  const location = useLocation();
+  const isChatPage = location.pathname === "/chat";
   const {
     voiceState, lastResponse, startListening, stopAndProcess,
     partialTranscript, pendingReminder, confirmReminder, cancelReminder,
@@ -27,6 +30,17 @@ const MicButton = () => {
       stopAndProcess();
     }
   };
+
+  if (isChatPage) {
+    return pendingReminder ? (
+      <ReminderConfirmDialog
+        open={voiceState === "confirming"}
+        reminder={pendingReminder}
+        onConfirm={confirmReminder}
+        onCancel={cancelReminder}
+      />
+    ) : null;
+  }
 
   return (
     <>

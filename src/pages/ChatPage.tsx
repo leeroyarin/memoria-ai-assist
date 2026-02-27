@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,6 +8,7 @@ import { processWithAI, type AIResponse } from "@/api/ai";
 import { createMemory, createReminder } from "@/api/db";
 import ReminderConfirmDialog, { type PendingReminder } from "@/components/ReminderConfirmDialog";
 import { cn } from "@/lib/utils";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 interface ChatMessage {
   id: string;
@@ -24,6 +25,7 @@ const ChatPage = () => {
   const [pendingReminder, setPendingReminder] = useState<PendingReminder | null>(null);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const voice = useVoiceInput();
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -126,14 +128,36 @@ const ChatPage = () => {
       </div>
 
       <div className="flex items-center gap-2 pt-2 border-t border-border">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message…"
-          disabled={loading}
-          className="flex-1"
-        />
+        {voice.voiceState === "listening" ? (
+          <div className="flex-1 flex items-center gap-2 text-sm text-destructive animate-pulse px-3">
+            <Mic className="h-4 w-4" />
+            <span>{voice.partialTranscript || "Listening..."}</span>
+          </div>
+        ) : (
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message…"
+            disabled={loading}
+            className="flex-1"
+          />
+        )}
+        <Button
+          size="icon"
+          variant={voice.voiceState === "listening" ? "destructive" : "outline"}
+          onClick={() => {
+            if (voice.voiceState === "idle") {
+              voice.startListening();
+            } else if (voice.voiceState === "listening") {
+              const text = voice.stopAndGetTranscript();
+              if (text) setInput(text);
+            }
+          }}
+          disabled={loading || (voice.voiceState !== "idle" && voice.voiceState !== "listening")}
+        >
+          <Mic className="h-4 w-4" />
+        </Button>
         <Button size="icon" onClick={sendMessage} disabled={!input.trim() || loading}>
           <Send className="h-4 w-4" />
         </Button>

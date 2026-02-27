@@ -34,6 +34,15 @@ export function useVoiceInput() {
     }
   }, [scribe, toast]);
 
+  const stopAndGetTranscript = useCallback((): string => {
+    const transcripts = scribe.committedTranscripts.map((t) => t.text).join(" ");
+    const partial = scribe.partialTranscript;
+    const fullText = [transcripts, partial].filter(Boolean).join(" ").trim();
+    scribe.disconnect();
+    setVoiceState("idle");
+    return fullText;
+  }, [scribe]);
+
   const stopAndProcess = useCallback(async () => {
     const transcripts = scribe.committedTranscripts.map((t) => t.text).join(" ");
     const partial = scribe.partialTranscript;
@@ -118,6 +127,7 @@ export function useVoiceInput() {
     lastResponse,
     startListening,
     stopAndProcess,
+    stopAndGetTranscript,
     partialTranscript: scribe.partialTranscript,
     isConnected: scribe.isConnected,
     pendingReminder,
