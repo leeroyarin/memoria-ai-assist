@@ -3,7 +3,7 @@ import { Home, MessageCircle, Brain, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { to: "/", icon: Home, label: "Home" },
+  { to: "/home", icon: Home, label: "Home" },
   { to: "/chat", icon: MessageCircle, label: "Chat" },
   { to: "/memories", icon: Brain, label: "Memories" },
   { to: "/reminders", icon: Bell, label: "Reminders" },

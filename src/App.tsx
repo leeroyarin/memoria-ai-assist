@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
+import HomePage from "./pages/HomePage";
 import Memories from "./pages/Memories";
 import Reminders from "./pages/Reminders";
 import SettingsPage from "./pages/SettingsPage";
@@ -24,6 +25,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route
               element={
@@ -32,7 +34,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             >
-              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<HomePage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/memories" element={<Memories />} />
               <Route path="/reminders" element={<Reminders />} />
