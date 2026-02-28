@@ -1,37 +1,33 @@
 
 
-## Problem Analysis
+## Fix: Wrong Language in Speech-to-Text + Add Cancel Button
 
-Two issues identified:
+### Problem 1: Wrong language transcription
+The `useScribe` hook doesn't specify a `languageCode`, so ElevenLabs auto-detects the language -- which often picks the wrong one. Fix: pass `languageCode: "eng"` in the scribe configuration.
 
-1. **No voice UI on Memories/Reminders pages**: The `MicButton` component explicitly returns `null` on `/memories` and `/reminders` routes (line 35-44). Meanwhile, those pages create their own separate `useVoiceInput()` instance via `FloatingActions`, but never render any listening/processing overlay. The user gets zero visual feedback.
+### Problem 2: No cancel button on voice overlay
+When listening/processing, the user has no way to cancel except tapping the overlay background (only during listening). Need a visible cancel button in all active voice states.
 
-2. **Android STT latency**: The `useScribe` hook uses `CommitStrategy.VAD` which waits for silence before committing. On Android, the WebSocket connection may also suffer from latency. We can't fully fix Android WebSocket performance, but we can optimize by showing immediate UI feedback and ensuring the connection isn't being created multiple times (the console shows "Already connected" warnings, meaning `startListening` is called while already connected).
+### Changes
 
-## Plan
+**1. `src/hooks/useVoiceInput.ts`** -- Set English language for Scribe
+- Add `languageCode: "eng"` to the `useScribe` options (line 18-22)
+- Add a `cancelVoice` function that disconnects scribe and resets state to idle
 
-### 1. Create a shared VoiceOverlay component
+**2. `src/components/VoiceOverlay.tsx`** -- Add cancel button
+- Add an `onCancel` prop
+- Render a cancel button (X icon or "Cancel" text) visible in all active states (listening, processing, thinking, speaking)
+- Clicking it calls `onCancel` to abort the current operation
 
-Extract the fullscreen voice UI overlay (currently inside `MicButton` lines 48-84) into a reusable `VoiceOverlay` component that accepts `voiceState`, `partialTranscript`, `lastResponse`, and `onStopListening` as props.
+**3. `src/components/layout/MicButton.tsx`** -- Pass cancel handler to VoiceOverlay
+- Wire the new `cancelVoice` function from the hook to the overlay's `onCancel` prop
 
-### 2. Add VoiceOverlay to Memories and Reminders pages
+**4. `src/pages/Memories.tsx` and `src/pages/Reminders.tsx`** -- Pass cancel handler to VoiceOverlay on these pages too
 
-Import and render `VoiceOverlay` in both `Memories.tsx` and `Reminders.tsx`, passing in the voice state from their existing `useVoiceInput()` hook. Also render `ReminderConfirmDialog` for pending reminders.
-
-### 3. Fix duplicate connection warning
-
-In `useVoiceInput.ts` `startListening`, guard against calling `scribe.connect()` when already connected by checking `scribe.isConnected` first. This prevents the "Already connected" warnings and potential double-initialization on Android.
-
-### 4. Update MicButton to use VoiceOverlay
-
-Refactor `MicButton` to use the extracted `VoiceOverlay` component instead of inline JSX, and remove the early return for memories/reminders pages (keep the MicButton hidden but let the overlay logic remain with each page's own hook).
-
-### Files to create
-- `src/components/VoiceOverlay.tsx` — extracted overlay + state labels
-
-### Files to modify
-- `src/pages/Memories.tsx` — add VoiceOverlay + ReminderConfirmDialog
-- `src/pages/Reminders.tsx` — add VoiceOverlay + ReminderConfirmDialog  
-- `src/hooks/useVoiceInput.ts` — add `isConnected` guard in `startListening`
-- `src/components/layout/MicButton.tsx` — use VoiceOverlay component
+### Files Modified
+- `src/hooks/useVoiceInput.ts`
+- `src/components/VoiceOverlay.tsx`
+- `src/components/layout/MicButton.tsx`
+- `src/pages/Memories.tsx`
+- `src/pages/Reminders.tsx`
 
