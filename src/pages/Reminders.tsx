@@ -9,6 +9,8 @@ import { useState } from "react";
 import AddReminderDialog from "@/components/AddReminderDialog";
 import FloatingActions from "@/components/FloatingActions";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
+import VoiceOverlay from "@/components/VoiceOverlay";
+import ReminderConfirmDialog from "@/components/ReminderConfirmDialog";
 
 const ReminderCard = ({ reminder, onDone, onDismiss }: { reminder: any; onDone: () => void; onDismiss: () => void }) => (
   <Card className="border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/30 transition-colors">
@@ -106,6 +108,22 @@ const Reminders = () => {
         onManualAdd={() => setAddOpen(true)}
         onVoice={() => voice.startListening()}
       />
+
+      <VoiceOverlay
+        voiceState={voice.voiceState}
+        partialTranscript={voice.partialTranscript}
+        lastResponse={voice.lastResponse}
+        onStopListening={voice.stopAndProcess}
+      />
+
+      {voice.pendingReminder && (
+        <ReminderConfirmDialog
+          open={voice.voiceState === "confirming"}
+          reminder={voice.pendingReminder}
+          onConfirm={voice.confirmReminder}
+          onCancel={voice.cancelReminder}
+        />
+      )}
     </motion.div>
   );
 };
