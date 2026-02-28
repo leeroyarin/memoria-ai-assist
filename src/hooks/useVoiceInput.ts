@@ -17,6 +17,7 @@ export function useVoiceInput() {
 
   const scribe = useScribe({
     modelId: "scribe_v2_realtime",
+    languageCode: "eng",
     commitStrategy: CommitStrategy.VAD,
     onCommittedTranscript: () => {},
   });
@@ -127,6 +128,12 @@ export function useVoiceInput() {
     setVoiceState("idle");
   }, []);
 
+  const cancelVoice = useCallback(() => {
+    scribe.disconnect();
+    setPendingReminder(null);
+    setVoiceState("idle");
+  }, [scribe]);
+
   return {
     voiceState,
     lastResponse,
@@ -138,5 +145,6 @@ export function useVoiceInput() {
     pendingReminder,
     confirmReminder,
     cancelReminder,
+    cancelVoice,
   };
 }
