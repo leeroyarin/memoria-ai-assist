@@ -1,29 +1,32 @@
 
 
-## Create a Dashboard Page
-
-Transform the current Home page (`/`) into a comprehensive dashboard that shows an overview of the app's features, pages, and capabilities alongside the existing stats.
+## Plan: Public Landing Page + Move Home to `/home`
 
 ### Changes
 
-**1. Rewrite `src/pages/Index.tsx` as the Dashboard**
+**1. Create `src/pages/LandingPage.tsx`** (new file)
+- Public page at `/` — no auth required
+- Shows app branding, feature overview (Voice Input, AI Chat, Memories, Reminders, Smart Summaries, Voice Feedback), and a "Sign In / Get Started" CTA button linking to `/auth`
+- Uses existing `Card`, `motion`, lucide icons — no new dependencies
 
-Keep existing stats (memory/reminder counts, recent activity) and add:
+**2. Create `src/pages/HomePage.tsx`** (new file)
+- Move the current authenticated home content here (greeting, stats, AI overview tip, recent activity)
+- This is essentially the original `Index.tsx` content before the dashboard changes were added (with stats + recent activity), mounted at `/home` behind auth
 
-- **Welcome header** with greeting (existing) plus a brief app description
-- **"What You Can Do" section** — a grid of feature cards explaining the app's capabilities:
-  - **Voice Input** — Speak naturally to save memories and set reminders via the mic button
-  - **AI Chat** — Conversational assistant that understands intent (save, remind, summarize)
-  - **Memories** — Store and search your thoughts, ideas, and notes with categories and tags
-  - **Reminders** — Time-based and activity-based reminders with priority levels
-  - **Smart Summaries** — Ask AI for daily summaries and "Am I forgetting anything?" overviews
-  - **Voice Feedback** — AI speaks responses aloud using text-to-speech
-- **"App Pages" section** — a list/grid of the 5 main pages (Home, Chat, Memories, Reminders, Settings) with icons, descriptions, and clickable navigation links
-- **Quick stats section** (existing counts cards, kept as-is)
-- **Recent Activity** (existing, kept as-is)
+**3. Rewrite `src/pages/Index.tsx`**
+- Simply re-export `LandingPage` as the default
 
-All new sections use existing `Card`, `motion` animations, and lucide icons — no new dependencies.
+**4. Update `src/App.tsx`**
+- `/` route → `LandingPage` (outside `ProtectedRoute`)
+- `/home` route → `HomePage` (inside `ProtectedRoute` + `AppLayout`)
 
-### Files Modified
-- `src/pages/Index.tsx` — rewritten as dashboard with feature overview, page guide, and existing stats
+**5. Update `src/components/layout/BottomNav.tsx`**
+- Change Home link from `/` to `/home`
+
+### Files
+- `src/pages/LandingPage.tsx` — new
+- `src/pages/HomePage.tsx` — new (original home content with stats/activity)
+- `src/pages/Index.tsx` — simplified to render LandingPage
+- `src/App.tsx` — updated routes
+- `src/components/layout/BottomNav.tsx` — Home link → `/home`
 
