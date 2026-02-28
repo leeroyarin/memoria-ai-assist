@@ -54,12 +54,25 @@ serve(async (req) => {
     const localTimeStr = userLocalTime || new Date().toISOString();
     const timezoneStr = userTimezone || "UTC";
 
+    // Parse the user's local time for more explicit context
+    const userDate = new Date(localTimeStr);
+    const formattedDate = userDate.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: timezoneStr });
+    const formattedTime = userDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: timezoneStr });
+
     const systemPrompt = `You are a voice-activated memory and reminder assistant. The user speaks to you via voice.
 
-The user's current local date/time: ${localTimeStr}
+The user's current local date: ${formattedDate}
+The user's current local time: ${formattedTime}
 The user's timezone: ${timezoneStr}
+Raw ISO timestamp: ${localTimeStr}
 
-IMPORTANT: All relative time references the user makes (e.g. "today", "yesterday", "this morning", "last night", "tomorrow") MUST be interpreted relative to their local date/time and timezone shown above, NOT UTC. When saving memories, include the actual date/time the event occurred based on the user's local time. When creating reminders with times, convert to the correct absolute time respecting their timezone.
+CRITICAL TIME RULES:
+- "tomorrow" means the NEXT calendar day from ${formattedDate}.
+- "1:30 PM" means 13:30, NOT 01:30. Always respect AM/PM explicitly.
+- If the user says a time without AM/PM, infer based on context (e.g. "1:30" during a daytime conversation likely means PM).
+- All trigger_time values MUST be in ISO 8601 format with the correct timezone offset for ${timezoneStr}.
+- NEVER default to midnight or 00:00 unless the user explicitly says midnight.
+- Double-check: if the user says "tomorrow at 1:30 PM" and today is ${formattedDate}, the trigger_time must be the next day at 13:30 in ${timezoneStr}.
 
 User's recent memories:
 ${memories.length ? memories.map(m => `- [${m.category || 'uncategorized'}] ${m.content} (saved: ${m.created_at})`).join("\n") : "None yet."}
@@ -75,7 +88,7 @@ Analyze the user's message and respond using the suggest_action tool. Determine 
 - "chat": general conversation or question
 
 For save_memory, extract content (include when the event happened relative to user's local time), suggest a category (Personal/Work/Shopping/Health/Finance/Other), and relevant tags.
-For create_reminder, extract title, determine if time-based or activity-based, extract trigger_time (ISO format in user's timezone) or trigger_context, and priority.
+For create_reminder, extract title, determine if time-based or activity-based, extract trigger_time (ISO format with timezone offset) or trigger_context, priority, and recurrence (once/daily/weekly/custom). Default recurrence to "once" unless the user says to repeat.
 For complete_reminder, match the user's statement against pending reminders and return the reminder_id of the matching one.
 For summary, analyze their memories and reminders and provide a helpful spoken overview.
 Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text-to-speech.`;
@@ -114,6 +127,7 @@ Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text
                       trigger_time: { type: "string" },
                       trigger_context: { type: "string" },
                       priority: { type: "string", enum: ["normal", "high"] },
+                      recurrence: { type: "string", enum: ["once", "daily", "weekly", "custom"], description: "How often to repeat. Default 'once'." },
                       reminder_id: { type: "string", description: "The id of the reminder to mark as done" },
                     },
                   },

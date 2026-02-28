@@ -42,6 +42,7 @@ export async function createReminder(reminder: {
   trigger_time?: string;
   trigger_context?: string;
   priority?: string;
+  recurrence?: string;
 }) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");

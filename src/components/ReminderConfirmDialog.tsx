@@ -11,6 +11,7 @@ export interface PendingReminder {
   trigger_time?: string;
   trigger_context?: string;
   priority?: string;
+  recurrence?: string;
 }
 
 interface ReminderConfirmDialogProps {
@@ -98,6 +99,23 @@ const ReminderConfirmDialog = ({ open, reminder, onConfirm, onCancel }: Reminder
               <ToggleGroupItem value="high" className="text-xs">High</ToggleGroupItem>
             </ToggleGroup>
           </div>
+
+          {form.type === "time" && (
+            <div className="space-y-1.5">
+              <Label>Repeat</Label>
+              <ToggleGroup
+                type="single"
+                value={form.recurrence || "once"}
+                onValueChange={(v) => v && setForm((f) => ({ ...f, recurrence: v }))}
+                className="justify-start"
+              >
+                <ToggleGroupItem value="once" className="text-xs">Once</ToggleGroupItem>
+                <ToggleGroupItem value="daily" className="text-xs">Daily</ToggleGroupItem>
+                <ToggleGroupItem value="weekly" className="text-xs">Weekly</ToggleGroupItem>
+                <ToggleGroupItem value="custom" className="text-xs">Custom</ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+          )}
         </div>
 
         <DrawerFooter>
