@@ -114,6 +114,7 @@ const Reminders = () => {
         partialTranscript={voice.partialTranscript}
         lastResponse={voice.lastResponse}
         onStopListening={voice.stopAndProcess}
+        onCancel={voice.cancelVoice}
       />
 
       {voice.pendingReminder && (

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import type { VoiceState } from "@/hooks/useVoiceInput";
 
 const stateLabels: Record<VoiceState, string> = {
@@ -15,9 +16,10 @@ interface VoiceOverlayProps {
   partialTranscript: string;
   lastResponse: string;
   onStopListening: () => void;
+  onCancel: () => void;
 }
 
-const VoiceOverlay = ({ voiceState, partialTranscript, lastResponse, onStopListening }: VoiceOverlayProps) => {
+const VoiceOverlay = ({ voiceState, partialTranscript, lastResponse, onStopListening, onCancel }: VoiceOverlayProps) => {
   const isActive = voiceState !== "idle" && voiceState !== "confirming";
 
   return (
@@ -53,6 +55,14 @@ const VoiceOverlay = ({ voiceState, partialTranscript, lastResponse, onStopListe
               {voiceState === "listening" && (
                 <p className="mt-2 text-xs text-muted-foreground">Tap anywhere to stop</p>
               )}
+
+              <button
+                onClick={(e) => { e.stopPropagation(); onCancel(); }}
+                className="mt-6 flex items-center gap-1.5 rounded-full bg-destructive/15 px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/25 active:scale-95"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </button>
             </motion.div>
           </div>
         </motion.div>

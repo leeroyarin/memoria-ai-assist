@@ -11,7 +11,7 @@ const MicButton = () => {
   const isMemoriesOrReminders = location.pathname === "/memories" || location.pathname === "/reminders";
   const {
     voiceState, lastResponse, startListening, stopAndProcess,
-    partialTranscript, pendingReminder, confirmReminder, cancelReminder,
+    partialTranscript, pendingReminder, confirmReminder, cancelReminder, cancelVoice,
   } = useVoiceInput();
 
   // On chat/memories/reminders pages, only render the reminder dialog from this instance
@@ -41,6 +41,7 @@ const MicButton = () => {
         partialTranscript={partialTranscript}
         lastResponse={lastResponse}
         onStopListening={stopAndProcess}
+        onCancel={cancelVoice}
       />
 
       {pendingReminder && (
