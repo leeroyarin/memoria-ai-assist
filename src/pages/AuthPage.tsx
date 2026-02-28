@@ -16,7 +16,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/home" replace />;
 
   const handleSubmit = async (mode: "login" | "signup") => {
     if (!email || !password) {

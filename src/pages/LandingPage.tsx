@@ -2,7 +2,8 @@ import { Brain, Bell, Mic, MessageCircle, Volume2, BarChart3, ArrowRight } from 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const container = {
   hidden: { opacity: 0 },
@@ -25,6 +26,10 @@ const features = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuthContext();
+
+  if (loading) return null;
+  if (user) return <Navigate to="/home" replace />;
 
   return (
     <div className="min-h-screen bg-background">
