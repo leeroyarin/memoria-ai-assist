@@ -22,6 +22,9 @@ const ReminderCard = ({ reminder, onDone, onDismiss }: { reminder: any; onDone: 
         </div>
         <div className="flex flex-wrap items-center gap-1.5 mt-2">
           <span className="text-[11px] font-medium bg-secondary text-secondary-foreground px-2.5 py-0.5 rounded-full">{reminder.type}</span>
+          {reminder.recurrence && reminder.recurrence !== "once" && (
+            <span className="text-[11px] font-medium bg-primary/15 text-primary px-2.5 py-0.5 rounded-full">{reminder.recurrence}</span>
+          )}
           {reminder.trigger_time && (
             <span className="text-[11px] text-muted-foreground">{format(new Date(reminder.trigger_time), "MMM d, h:mm a")}</span>
           )}

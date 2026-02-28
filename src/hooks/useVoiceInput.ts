@@ -79,6 +79,7 @@ export function useVoiceInput() {
           trigger_time: aiResult.data.trigger_time,
           trigger_context: aiResult.data.trigger_context,
           priority: aiResult.data.priority,
+          recurrence: aiResult.data.recurrence || "once",
         });
       }
 
@@ -113,6 +114,7 @@ export function useVoiceInput() {
         trigger_time: edited.trigger_time,
         trigger_context: edited.trigger_context,
         priority: edited.priority,
+        recurrence: edited.recurrence,
       });
       toast({ title: "Reminder saved" });
     } catch (e: any) {

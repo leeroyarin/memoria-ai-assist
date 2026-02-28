@@ -11,6 +11,7 @@ export interface AIResponse {
     trigger_time?: string;
     trigger_context?: string;
     priority?: "normal" | "high";
+    recurrence?: "once" | "daily" | "weekly" | "custom";
     reminder_id?: string;
   };
   spoken_reply: string;

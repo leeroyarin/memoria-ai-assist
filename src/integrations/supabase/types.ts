@@ -83,6 +83,7 @@ export type Database = {
           id: string
           memory_id: string | null
           priority: string
+          recurrence: string
           status: string
           title: string
           trigger_context: string | null
@@ -96,6 +97,7 @@ export type Database = {
           id?: string
           memory_id?: string | null
           priority?: string
+          recurrence?: string
           status?: string
           title: string
           trigger_context?: string | null
@@ -109,6 +111,7 @@ export type Database = {
           id?: string
           memory_id?: string | null
           priority?: string
+          recurrence?: string
           status?: string
           title?: string
           trigger_context?: string | null

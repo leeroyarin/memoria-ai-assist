@@ -20,10 +20,11 @@ export default function AddReminderDialog({ open, onOpenChange }: Props) {
   const [triggerTime, setTriggerTime] = useState("");
   const [triggerContext, setTriggerContext] = useState("");
   const [priority, setPriority] = useState<"normal" | "high">("normal");
+  const [recurrence, setRecurrence] = useState<"once" | "daily" | "weekly" | "custom">("once");
   const [saving, setSaving] = useState(false);
   const queryClient = useQueryClient();
 
-  const reset = () => { setTitle(""); setType("time"); setTriggerTime(""); setTriggerContext(""); setPriority("normal"); };
+  const reset = () => { setTitle(""); setType("time"); setTriggerTime(""); setTriggerContext(""); setPriority("normal"); setRecurrence("once"); };
 
   const handleSubmit = async () => {
     if (!title.trim()) return;
@@ -32,6 +33,7 @@ export default function AddReminderDialog({ open, onOpenChange }: Props) {
       title: title.trim(),
       type,
       priority,
+      recurrence: type === "time" ? recurrence : "once",
       ...(type === "time" && triggerTime ? { trigger_time: new Date(triggerTime).toISOString() } : {}),
       ...(type === "activity" && triggerContext ? { trigger_context: triggerContext.trim() } : {}),
     };
@@ -73,10 +75,23 @@ export default function AddReminderDialog({ open, onOpenChange }: Props) {
             </Tabs>
           </div>
           {type === "time" ? (
-            <div className="space-y-2">
-              <Label>When</Label>
-              <Input type="datetime-local" value={triggerTime} onChange={e => setTriggerTime(e.target.value)} />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label>When</Label>
+                <Input type="datetime-local" value={triggerTime} onChange={e => setTriggerTime(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Repeat</Label>
+                <Tabs value={recurrence} onValueChange={v => setRecurrence(v as any)} className="w-full">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="once" className="flex-1">Once</TabsTrigger>
+                    <TabsTrigger value="daily" className="flex-1">Daily</TabsTrigger>
+                    <TabsTrigger value="weekly" className="flex-1">Weekly</TabsTrigger>
+                    <TabsTrigger value="custom" className="flex-1">Custom</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            </>
           ) : (
             <div className="space-y-2">
               <Label>After what activity?</Label>
