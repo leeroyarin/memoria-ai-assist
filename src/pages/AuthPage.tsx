@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getUserFriendlyError } from "@/lib/errors";
 import { motion } from "framer-motion";
 
 export default function AuthPage() {
@@ -28,7 +29,7 @@ export default function AuthPage() {
     setLoading(false);
 
     if (error) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+      toast({ variant: "destructive", title: "Error", description: getUserFriendlyError(error) });
     } else if (mode === "signup") {
       toast({ title: "Check your email", description: "We sent you a confirmation link." });
     }

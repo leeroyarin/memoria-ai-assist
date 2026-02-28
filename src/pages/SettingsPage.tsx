@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { getUserFriendlyError } from "@/lib/errors";
 
 const SettingRow = ({
   icon: Icon,
@@ -41,7 +42,7 @@ const SettingsPage = () => {
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
-      toast({ variant: "destructive", title: "Error signing out", description: error.message });
+      toast({ variant: "destructive", title: "Error signing out", description: getUserFriendlyError(error) });
     } else {
       navigate("/auth");
     }
