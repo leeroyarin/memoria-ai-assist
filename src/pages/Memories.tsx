@@ -9,6 +9,8 @@ import { format } from "date-fns";
 import AddMemoryDialog from "@/components/AddMemoryDialog";
 import FloatingActions from "@/components/FloatingActions";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
+import VoiceOverlay from "@/components/VoiceOverlay";
+import ReminderConfirmDialog from "@/components/ReminderConfirmDialog";
 
 const Memories = () => {
   const { data: memories, isLoading, remove } = useMemories();
@@ -91,6 +93,22 @@ const Memories = () => {
         onManualAdd={() => setAddOpen(true)}
         onVoice={() => voice.startListening()}
       />
+
+      <VoiceOverlay
+        voiceState={voice.voiceState}
+        partialTranscript={voice.partialTranscript}
+        lastResponse={voice.lastResponse}
+        onStopListening={voice.stopAndProcess}
+      />
+
+      {voice.pendingReminder && (
+        <ReminderConfirmDialog
+          open={voice.voiceState === "confirming"}
+          reminder={voice.pendingReminder}
+          onConfirm={voice.confirmReminder}
+          onCancel={voice.cancelReminder}
+        />
+      )}
     </motion.div>
   );
 };

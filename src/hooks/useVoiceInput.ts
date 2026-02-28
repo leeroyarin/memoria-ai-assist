@@ -22,6 +22,7 @@ export function useVoiceInput() {
   });
 
   const startListening = useCallback(async () => {
+    if (scribe.isConnected) return; // Prevent duplicate connections
     try {
       setVoiceState("listening");
       const token = await getScribeToken();
