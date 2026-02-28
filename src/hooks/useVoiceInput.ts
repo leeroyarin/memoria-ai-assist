@@ -4,6 +4,7 @@ import { getScribeToken, textToSpeech } from "@/api/voice";
 import { processWithAI, type AIResponse } from "@/api/ai";
 import { createMemory, createReminder, updateReminderStatus } from "@/api/db";
 import { useToast } from "@/hooks/use-toast";
+import { getUserFriendlyError } from "@/lib/errors";
 import type { PendingReminder } from "@/components/ReminderConfirmDialog";
 
 export type VoiceState = "idle" | "listening" | "processing" | "thinking" | "speaking" | "confirming";
@@ -30,7 +31,7 @@ export function useVoiceInput() {
       });
     } catch (e: any) {
       setVoiceState("idle");
-      toast({ variant: "destructive", title: "Mic error", description: e.message });
+      toast({ variant: "destructive", title: "Mic error", description: getUserFriendlyError(e) });
     }
   }, [scribe, toast]);
 
@@ -94,7 +95,7 @@ export function useVoiceInput() {
         return; // Don't go to idle yet
       }
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Processing error", description: e.message });
+      toast({ variant: "destructive", title: "Processing error", description: getUserFriendlyError(e) });
     } finally {
       if (voiceState !== "confirming") {
         setVoiceState((prev) => (prev === "confirming" ? prev : "idle"));
@@ -113,7 +114,7 @@ export function useVoiceInput() {
       });
       toast({ title: "Reminder saved" });
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Save error", description: e.message });
+      toast({ variant: "destructive", title: "Save error", description: getUserFriendlyError(e) });
     } finally {
       setPendingReminder(null);
       setVoiceState("idle");

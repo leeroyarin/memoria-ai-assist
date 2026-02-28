@@ -7,6 +7,7 @@ import { processWithAI, type AIResponse } from "@/api/ai";
 import { createMemory, createReminder, updateReminderStatus } from "@/api/db";
 import ReminderConfirmDialog, { type PendingReminder } from "@/components/ReminderConfirmDialog";
 import { cn } from "@/lib/utils";
+import { getUserFriendlyError } from "@/lib/errors";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { motion } from "framer-motion";
 
@@ -74,7 +75,7 @@ const ChatPage = () => {
       };
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message });
+      toast({ variant: "destructive", title: "Error", description: getUserFriendlyError(e) });
     } finally {
       setLoading(false);
     }
