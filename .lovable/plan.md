@@ -1,33 +1,25 @@
 
 
-## Fix: Wrong Language in Speech-to-Text + Add Cancel Button
+## Fix: Separate Date and Time Inputs in ReminderConfirmDialog
 
-### Problem 1: Wrong language transcription
-The `useScribe` hook doesn't specify a `languageCode`, so ElevenLabs auto-detects the language -- which often picks the wrong one. Fix: pass `languageCode: "eng"` in the scribe configuration.
+### Problem
+The `datetime-local` input (line 69-74) couples date and time together. When the user changes the date, it can reset or affect the time value. The user wants independent date and time controls.
 
-### Problem 2: No cancel button on voice overlay
-When listening/processing, the user has no way to cancel except tapping the overlay background (only during listening). Need a visible cancel button in all active voice states.
+### Solution
+Replace the single `<Input type="datetime-local">` with two separate inputs:
+1. **Date picker** — using a Shadcn `Calendar` inside a `Popover` (as per the datepicker pattern)
+2. **Time input** — a simple `<Input type="time">` for hours/minutes
 
-### Changes
+When either changes, reconstruct the full ISO timestamp by combining the date part from the calendar and the time part from the time input, preserving the other value.
 
-**1. `src/hooks/useVoiceInput.ts`** -- Set English language for Scribe
-- Add `languageCode: "eng"` to the `useScribe` options (line 18-22)
-- Add a `cancelVoice` function that disconnects scribe and resets state to idle
-
-**2. `src/components/VoiceOverlay.tsx`** -- Add cancel button
-- Add an `onCancel` prop
-- Render a cancel button (X icon or "Cancel" text) visible in all active states (listening, processing, thinking, speaking)
-- Clicking it calls `onCancel` to abort the current operation
-
-**3. `src/components/layout/MicButton.tsx`** -- Pass cancel handler to VoiceOverlay
-- Wire the new `cancelVoice` function from the hook to the overlay's `onCancel` prop
-
-**4. `src/pages/Memories.tsx` and `src/pages/Reminders.tsx`** -- Pass cancel handler to VoiceOverlay on these pages too
-
-### Files Modified
-- `src/hooks/useVoiceInput.ts`
-- `src/components/VoiceOverlay.tsx`
-- `src/components/layout/MicButton.tsx`
-- `src/pages/Memories.tsx`
-- `src/pages/Reminders.tsx`
+### Files to modify
+- **`src/components/ReminderConfirmDialog.tsx`**
+  - Import `Calendar`, `Popover`, `PopoverTrigger`, `PopoverContent`, `format` from date-fns, `CalendarIcon`
+  - Replace the `datetime-local` input (lines 66-76) with:
+    - A date popover using `Calendar` (with `pointer-events-auto`)
+    - A separate `<Input type="time">` field
+  - Parse existing `trigger_time` into separate date and time parts
+  - On date change: keep existing time, update date
+  - On time change: keep existing date, update time
+  - Reconstruct ISO string from both parts on each change
 
