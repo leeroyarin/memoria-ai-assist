@@ -31,7 +31,16 @@ serve(async (req) => {
     }
     const userId = claimsData.claims.sub;
 
-    const { message, history, userLocalTime, userTimezone } = await req.json();
+    const body = await req.json();
+    const message = typeof body.message === "string" ? body.message.slice(0, 5000) : "";
+    if (!message) {
+      return new Response(JSON.stringify({ error: "Message is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const history = Array.isArray(body.history)
+      ? body.history.slice(0, 50).map((h: any) => ({ role: h.role === "user" ? "user" : "assistant", content: typeof h.content === "string" ? h.content.slice(0, 5000) : "" }))
+      : [];
+    const userLocalTime = typeof body.userLocalTime === "string" ? body.userLocalTime.slice(0, 100) : undefined;
+    const userTimezone = typeof body.userTimezone === "string" ? body.userTimezone.slice(0, 100) : undefined;
 
     // Fetch user context
     const [memoriesRes, remindersRes] = await Promise.all([
@@ -81,7 +90,7 @@ Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...(Array.isArray(history) ? history.map((h: any) => ({ role: h.role === "user" ? "user" : "assistant", content: h.content })) : []),
+          ...history,
           { role: "user", content: message },
         ],
         tools: [
