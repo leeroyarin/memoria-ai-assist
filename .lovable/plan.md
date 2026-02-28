@@ -1,32 +1,18 @@
 
 
-## Plan: Public Landing Page + Move Home to `/home`
+## Fix Auth Navigation Flow
+
+The "Get Started" button navigates to `/auth`, which works. However, after successful login, `AuthPage` redirects to `/` (the public landing page) instead of `/home` (the authenticated dashboard). This creates a loop where logged-in users keep seeing the landing page.
 
 ### Changes
 
-**1. Create `src/pages/LandingPage.tsx`** (new file)
-- Public page at `/` — no auth required
-- Shows app branding, feature overview (Voice Input, AI Chat, Memories, Reminders, Smart Summaries, Voice Feedback), and a "Sign In / Get Started" CTA button linking to `/auth`
-- Uses existing `Card`, `motion`, lucide icons — no new dependencies
+**1. `src/pages/AuthPage.tsx`** — Change redirect from `/` to `/home`
+- Line 19: `<Navigate to="/" replace />` → `<Navigate to="/home" replace />`
 
-**2. Create `src/pages/HomePage.tsx`** (new file)
-- Move the current authenticated home content here (greeting, stats, AI overview tip, recent activity)
-- This is essentially the original `Index.tsx` content before the dashboard changes were added (with stats + recent activity), mounted at `/home` behind auth
+**2. `src/pages/LandingPage.tsx`** — Add redirect for already-logged-in users
+- If user is already authenticated, redirect them to `/home` instead of showing the landing page
 
-**3. Rewrite `src/pages/Index.tsx`**
-- Simply re-export `LandingPage` as the default
-
-**4. Update `src/App.tsx`**
-- `/` route → `LandingPage` (outside `ProtectedRoute`)
-- `/home` route → `HomePage` (inside `ProtectedRoute` + `AppLayout`)
-
-**5. Update `src/components/layout/BottomNav.tsx`**
-- Change Home link from `/` to `/home`
-
-### Files
-- `src/pages/LandingPage.tsx` — new
-- `src/pages/HomePage.tsx` — new (original home content with stats/activity)
-- `src/pages/Index.tsx` — simplified to render LandingPage
-- `src/App.tsx` — updated routes
-- `src/components/layout/BottomNav.tsx` — Home link → `/home`
+### Files Modified
+- `src/pages/AuthPage.tsx`
+- `src/pages/LandingPage.tsx`
 
