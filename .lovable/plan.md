@@ -1,51 +1,29 @@
 
 
-## Create API & AI Integration Documentation
+## Create a Dashboard Page
 
-Create a comprehensive `API_DOCUMENTATION.md` file at the project root covering all backend functions, database schema, client APIs, and AI integration details.
+Transform the current Home page (`/`) into a comprehensive dashboard that shows an overview of the app's features, pages, and capabilities alongside the existing stats.
 
-### Document Structure
+### Changes
 
-**1. Authentication API**
-- Sign up, sign in, sign out via AuthContext
-- Session management and protected routes
+**1. Rewrite `src/pages/Index.tsx` as the Dashboard**
 
-**2. Database Schema & Tables**
-- `profiles` — user settings (notifications, voice feedback, alarm sound)
-- `memories` — user memories (content, category, tags)
-- `reminders` — user reminders (title, type, trigger_time/context, priority, status)
-- Database functions: `handle_new_user`, `validate_reminder_type`
+Keep existing stats (memory/reminder counts, recent activity) and add:
 
-**3. Client-Side Data API (`src/api/db.ts`)**
-- `fetchMemories()` — GET all memories ordered by date
-- `createMemory({ content, category?, tags? })` — INSERT memory
-- `deleteMemory(id)` — DELETE memory
-- `fetchReminders(filter?)` — GET reminders with optional type filter
-- `createReminder({ title, type, trigger_time?, trigger_context?, priority? })` — INSERT reminder
-- `updateReminderStatus(id, status)` — UPDATE reminder status
-- `fetchProfile()` — GET user profile
-- `fetchCounts()` — GET memory/reminder counts
+- **Welcome header** with greeting (existing) plus a brief app description
+- **"What You Can Do" section** — a grid of feature cards explaining the app's capabilities:
+  - **Voice Input** — Speak naturally to save memories and set reminders via the mic button
+  - **AI Chat** — Conversational assistant that understands intent (save, remind, summarize)
+  - **Memories** — Store and search your thoughts, ideas, and notes with categories and tags
+  - **Reminders** — Time-based and activity-based reminders with priority levels
+  - **Smart Summaries** — Ask AI for daily summaries and "Am I forgetting anything?" overviews
+  - **Voice Feedback** — AI speaks responses aloud using text-to-speech
+- **"App Pages" section** — a list/grid of the 5 main pages (Home, Chat, Memories, Reminders, Settings) with icons, descriptions, and clickable navigation links
+- **Quick stats section** (existing counts cards, kept as-is)
+- **Recent Activity** (existing, kept as-is)
 
-**4. Edge Functions (Backend)**
-- `elevenlabs-scribe-token` — generates single-use STT token
-- `elevenlabs-tts` — text-to-speech conversion, returns MP3 audio
-- `ai-assistant` — AI intent classification and response generation
+All new sections use existing `Card`, `motion` animations, and lucide icons — no new dependencies.
 
-**5. AI Assistant Integration**
-- Request/response schema with tool-calling pattern
-- Intent types: save_memory, create_reminder, complete_reminder, summary, chat
-- System prompt structure with user context injection
-- Lovable AI Gateway usage (model: gemini-3-flash-preview)
-
-**6. Voice API (`src/api/voice.ts`)**
-- `getScribeToken()` — fetch STT token from edge function
-- `textToSpeech(text)` — call TTS edge function and play audio
-
-**7. Voice Input Flow (`useVoiceInput` hook)**
-- State machine: idle → listening → thinking → speaking → confirming → idle
-- ElevenLabs Scribe realtime WebSocket integration
-- Full processing pipeline documentation
-
-### File
-- `API_DOCUMENTATION.md` — new file at project root
+### Files Modified
+- `src/pages/Index.tsx` — rewritten as dashboard with feature overview, page guide, and existing stats
 
