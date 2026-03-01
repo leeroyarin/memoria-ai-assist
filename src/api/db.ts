@@ -60,6 +60,18 @@ export async function updateReminderStatus(id: string, status: "done" | "dismiss
   if (error) throw error;
 }
 
+export async function updateReminder(id: string, fields: {
+  title?: string;
+  type?: string;
+  trigger_time?: string;
+  trigger_context?: string;
+  priority?: string;
+  recurrence?: string;
+}) {
+  const { error } = await supabase.from("reminders").update(fields).eq("id", id);
+  if (error) throw error;
+}
+
 // Profile
 export async function fetchProfile() {
   const { data: { user } } = await supabase.auth.getUser();

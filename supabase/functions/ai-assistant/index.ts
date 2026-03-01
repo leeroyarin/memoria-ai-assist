@@ -84,6 +84,7 @@ Analyze the user's message and respond using the suggest_action tool. Determine 
 - "save_memory": user wants to remember/note something. Include temporal context (when the event happened) in the content based on their local time.
 - "create_reminder": user wants to be reminded about something
 - "complete_reminder": user says they finished/completed a task that matches a pending reminder
+- "edit_reminder": user wants to change/update an existing pending reminder (title, time, priority, recurrence, type, or trigger_context). Return the reminder_id of the matching reminder plus only the fields to update.
 - "summary": user asks "am I forgetting anything?" or wants an overview
 - "chat": general conversation or question
 
@@ -115,7 +116,7 @@ Always provide a natural, concise spoken_reply (1-2 sentences) suitable for text
               parameters: {
                 type: "object",
                 properties: {
-                  action: { type: "string", enum: ["save_memory", "create_reminder", "complete_reminder", "summary", "chat"] },
+                  action: { type: "string", enum: ["save_memory", "create_reminder", "complete_reminder", "edit_reminder", "summary", "chat"] },
                   data: {
                     type: "object",
                     properties: {

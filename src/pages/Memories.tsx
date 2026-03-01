@@ -89,10 +89,12 @@ const Memories = () => {
         </Card>
       )}
 
-      <FloatingActions
-        onManualAdd={() => setAddOpen(true)}
-        onVoice={() => voice.startListening()}
-      />
+      {voice.voiceState === "idle" && (
+        <FloatingActions
+          onManualAdd={() => setAddOpen(true)}
+          onVoice={() => voice.startListening()}
+        />
+      )}
 
       <VoiceOverlay
         voiceState={voice.voiceState}

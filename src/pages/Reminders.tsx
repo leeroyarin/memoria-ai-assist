@@ -107,10 +107,12 @@ const Reminders = () => {
         <TabsContent value="activity" className="mt-4"><ReminderList filter="activity" /></TabsContent>
       </Tabs>
 
-      <FloatingActions
-        onManualAdd={() => setAddOpen(true)}
-        onVoice={() => voice.startListening()}
-      />
+      {voice.voiceState === "idle" && (
+        <FloatingActions
+          onManualAdd={() => setAddOpen(true)}
+          onVoice={() => voice.startListening()}
+        />
+      )}
 
       <VoiceOverlay
         voiceState={voice.voiceState}
