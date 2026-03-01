@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useScribe, CommitStrategy } from "@elevenlabs/react";
 import { getScribeToken, textToSpeech } from "@/api/voice";
 import { processWithAI, type AIResponse } from "@/api/ai";
-import { createMemory, createReminder, updateReminderStatus } from "@/api/db";
+import { createMemory, createReminder, updateReminderStatus, updateReminder } from "@/api/db";
 import { useToast } from "@/hooks/use-toast";
 import { getUserFriendlyError } from "@/lib/errors";
 import type { PendingReminder } from "@/components/ReminderConfirmDialog";
@@ -71,6 +71,17 @@ export function useVoiceInput() {
       } else if (aiResult.action === "complete_reminder" && aiResult.data?.reminder_id) {
         await updateReminderStatus(aiResult.data.reminder_id, "done");
         toast({ title: "Reminder completed ✓" });
+      } else if (aiResult.action === "edit_reminder" && aiResult.data?.reminder_id) {
+        const { reminder_id, ...fields } = aiResult.data;
+        const updateFields: Record<string, any> = {};
+        if (fields.title) updateFields.title = fields.title;
+        if (fields.type) updateFields.type = fields.type;
+        if (fields.trigger_time) updateFields.trigger_time = fields.trigger_time;
+        if (fields.trigger_context) updateFields.trigger_context = fields.trigger_context;
+        if (fields.priority) updateFields.priority = fields.priority;
+        if (fields.recurrence) updateFields.recurrence = fields.recurrence;
+        await updateReminder(reminder_id, updateFields);
+        toast({ title: "Reminder updated ✓" });
       } else if (aiResult.action === "create_reminder" && aiResult.data?.title) {
         // Store pending reminder instead of saving directly
         setPendingReminder({
